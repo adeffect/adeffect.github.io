@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advertising Response Heterogeneity Dashboard</title>
+  <meta name="description"
+    content="Interactive dashboard visualizing heterogeneity in advertising response across brands, markets, and store characteristics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <h1>Measuring Heterogeneity in TV Advertising Elasticities: Evidence from 135 Retail and Restaurant Brands</h1>
+      <p class="header-subtitle">Samsun Knight, Tsung-Yiou Hsieh, and Yakov Bart &mdash; Forthcoming in the <em>Journal
+          of Marketing Research</em></p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Overview Section -->
+    <section class="card overview-card" id="overview">
+      <h2>Overview</h2>
+      <p>
+        This dashboard presents an interactive summary of the heterogeneity in advertising
+        response documented in the paper. The goal is to make transparent how advertising effectiveness varies
+        across markets and how observable market characteristics moderate these responses,
+        beyond what is captured by average treatment effects.
+      </p>
+      <p class="caveat-note">
+        ⚠️ All results shown are based on <strong>point estimates</strong>. Uncertainty measures
+        (e.g., confidence intervals) will be incorporated in a future update.
+      </p>
+      <div class="overview-features">
+        <div class="feature-item">
+          <span class="feature-icon">📊</span>
+          <span>The <strong>advertising elasticity</strong>, capturing the average response to advertising</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🔍</span>
+          <span>The <strong>relative contribution of store characteristics</strong> in moderating ad
+            effectiveness</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📈</span>
+          <span>The <strong>distribution of estimated advertising elasticity</strong> across stores within designated
+            market areas (DMAs)</span>
+        </div>
+      </div>
+      <div class="overview-chart-wrapper">
+        <h3>Distribution of Advertising Elasticity Across Brands</h3>
+        <p class="chart-subtitle">Trimmed to the 5th&ndash;95th percentile range</p>
+        <div class="chart-wrapper">
+          <canvas id="overall-brand-dist-chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Brand Selector -->
+    <section class="card selector-card" id="brand-selector-section">
+      <div class="selector-main-row">
+        <label for="brand-select"><strong>Select Brand:</strong></label>
+        <select id="brand-select"></select>
+        <span class="brand-meta" id="brand-meta"></span>
+      </div>
+      <div class="selector-note">Brands outside the 5th–95th percentile of ad elasticity are marked as having
+        limited data.</div>
+      <div class="limited-data-banner" id="limited-data-banner" style="display:none;">
+        ⚠️ This brand falls outside the 5th–95th percentile range of estimated advertising elasticities. Results may be
+        less reliable due to extreme point estimates. Interpret with caution.
+      </div>
+    </section>
+
+    <!-- Main Elasticity KPI -->
+    <section class="card kpi-card" id="kpi-section">
+      <div class="kpi-label">Advertising Elasticity</div>
+      <div class="kpi-value" id="kpi-value">—</div>
+      <div class="kpi-note">Point estimate of the average effect of advertising on sales (ad-stock weighted)</div>
+    </section>
+
+    <!-- Two-column: Moderators + Store Distribution -->
+    <section class="two-col" id="main-charts">
+      <div class="card chart-card">
+        <h3>Drivers of Advertising Response Heterogeneity</h3>
+        <p class="chart-subtitle">Moderating effects normalized by the main advertising effect</p>
+        <div class="chart-wrapper">
+          <canvas id="moderators-chart"></canvas>
+        </div>
+      </div>
+      <div class="card chart-card">
+        <h3>Distribution of Ad Elasticity Across Stores</h3>
+        <p class="chart-subtitle">Store-level elasticity distribution for the selected brand</p>
+        <div class="chart-wrapper">
+          <canvas id="store-dist-chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- DMA Boxplot -->
+    <section class="card chart-card wide-card" id="dma-boxplot-section">
+      <h3>Distribution of Ad Elasticity Across DMAs</h3>
+      <p class="chart-subtitle">Each box represents the distribution of store-level elasticities within a DMA. DMAs are
+        ordered by their median elasticity.</p>
+      <div class="chart-wrapper chart-wrapper-wide">
+        <canvas id="dma-boxplot-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- DMA Drill-Down -->
+    <section class="card chart-card wide-card" id="dma-drilldown-section">
+      <h3>DMA-Level Drill-Down: Advertising Elasticity Distribution</h3>
+      <p class="chart-subtitle">Explore how advertising elasticity varies <strong>within a specific geographic market
+          (DMA)</strong>.</p>
+
+      <div class="selector-row">
+        <label for="dma-select"><strong>Select DMA:</strong></label>
+        <select id="dma-select"></select>
+      </div>
+
+      <div class="dma-drilldown-content">
+        <div class="dma-map-container">
+          <canvas id="dma-map-canvas" width="600" height="400"></canvas>
+        </div>
+        <div class="dma-details">
+          <table class="dma-table" id="dma-summary-table">
+            <thead>
+              <tr>
+                <th>Brand</th>
+                <th>Selected DMA</th>
+                <th># of Stores</th>
+                <th>Avg AdStock Level</th>
+                <th>Median Elasticity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="dma-td-brand">—</td>
+                <td id="dma-td-code">—</td>
+                <td id="dma-td-stores">—</td>
+                <td id="dma-td-adstock">—</td>
+                <td id="dma-td-median">—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="chart-wrapper">
+            <canvas id="dma-hist-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interpretation Notes -->
+    <section class="card notes-card" id="notes">
+      <h2>Interpretation Notes</h2>
+      <p>
+        The dashboard visualizes estimated heterogeneity. All coefficients and elasticities
+        are based on the estimated advertising response model. The purpose of this dashboard
+        is to provide intuition for the economic relevance of heterogeneity, rather than to
+        perform estimation or optimization.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Research Demo &middot; Generated <span id="gen-date"></span></p>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <!-- Map + Data -->
+  <script src="us_states.js?v=6"></script>
+  <script src="data.js?v=6"></script>
+  <!-- App -->
+  <script src="app.js?v=6"></script>
+</body>
+
+</html>
